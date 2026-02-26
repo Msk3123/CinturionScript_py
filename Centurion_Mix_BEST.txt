@@ -1,0 +1,8 @@
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/01_No Troubles.mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/02_7TEEN’S - ПЯТНИЦЯ (Official Mood Video).mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/02_demo_330hz.mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/03_#MUZYKADLJADUSHI.mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/03_demo_440hz.mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/04_Sunroof.mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/05_Мокрая.mp3'
+file 'C:/Users/maksp/PycharmProjects/ChentyriomScript/temp_songs/processed/06_Зашей x Ты так красива мешап (short version).mp3'

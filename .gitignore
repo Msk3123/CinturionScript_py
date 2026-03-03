@@ -1,0 +1,27 @@
+# Секрети — НІКОЛИ не комітати
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Тимчасові аудіо-файли
+temp_songs/
+*.mp3
+!assets/beep.mp3
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Docker
+*.log
+

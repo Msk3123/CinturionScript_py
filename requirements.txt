@@ -1,3 +1,4 @@
 pydub==0.25.1
 yt-dlp==2025.2.19
-
+python-dotenv>=1.0.1
+aiogram>=3.26.0

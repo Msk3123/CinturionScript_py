@@ -1,0 +1,13 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Персистентні дані між перезапусками контейнера
+      - ./data/temp:/app/data/temp
+      - ./data/output:/app/data/output
+      - ./assets:/app/assets
+    # ffmpeg береться з apt (система), папка ffmpeg/ ігнорується в Docker
+

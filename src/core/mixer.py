@@ -8,6 +8,8 @@ import logging
 import subprocess
 from pathlib import Path
 
+from src.core.utils import find_ffmpeg
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,10 +17,6 @@ class Mixer:
     """Склеює оброблені mp3-фрагменти в один фінальний файл."""
 
     def __init__(self, ffmpeg_dir: Path) -> None:
-        """
-        Args:
-            ffmpeg_dir: папка з ffmpeg-бінарниками.
-        """
         self.ffmpeg_dir = ffmpeg_dir
 
     def concat(
@@ -44,9 +42,8 @@ class Mixer:
             lines.append(f"file '{safe}'")
         list_file.write_text("\n".join(lines), encoding="utf-8")
 
-        ffmpeg_bin = self.ffmpeg_dir / "ffmpeg.exe"
-        if not ffmpeg_bin.exists():
-            ffmpeg_bin = Path("ffmpeg")  # fallback до PATH
+        # find_ffmpeg шукає: ffmpeg_dir/ffmpeg.exe → ffmpeg_dir/ffmpeg → PATH
+        ffmpeg_bin = find_ffmpeg(self.ffmpeg_dir)
 
         cmd: list[str] = [
             str(ffmpeg_bin),

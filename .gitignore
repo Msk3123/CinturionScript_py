@@ -1,27 +1,43 @@
 # Секрети — НІКОЛИ не комітати
 .env
 
+# Віртуальні середовища — НІКОЛИ не комітати
+.venv/
+.venv1/
+.venv2/
+venv/
+env/
+ENV/
+
 # Python
 __pycache__/
 *.py[cod]
 *.pyo
-*.pyd
-.Python
+.venv*/
+venv/
 *.egg-info/
 dist/
 build/
-.eggs/
 
-# Тимчасові аудіо-файли
+# Тимчасові файли генерації
+data/temp/
+data/output/
 temp_songs/
+
+# Медіафайли (важкі, не потрібні в репо)
 *.mp3
-!assets/beep.mp3
+*.wav
+*.ogg
+Centurion_Mix_BEST.*
+
+# ffmpeg бінарники Windows — не потрібні на Linux/Docker
+ffmpeg/*.exe
 
 # IDE
 .idea/
 .vscode/
 *.iml
 
-# Docker
-*.log
-
+# OS
+.DS_Store
+Thumbs.db

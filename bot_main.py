@@ -1,11 +1,11 @@
 """
-bot_main.py — точка входу Telegram-бота Centurion Mix.
+bot_main.py — єдина точка входу Telegram-бота Centurion Mix.
 
-Запуск:
+Запуск локально:
     python bot_main.py
 
-Бот стартує через long-polling (підходить для локальної розробки і VPS).
-Для продакшену можна перейти на webhook — див. коментар у коді.
+Запуск у Docker:
+    docker compose up -d --build
 """
 
 from __future__ import annotations
@@ -18,8 +18,9 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from bot.handlers import router
-from config import load_config
+from src.bot.middlewares.logging_middleware import LoggingMiddleware
+from src.bot.router import build_router
+from src.config.settings import get_config
 
 
 def setup_logging(level: str) -> None:
@@ -32,64 +33,62 @@ def setup_logging(level: str) -> None:
 
 
 async def main() -> None:
-    """
-    Ініціалізує бота та запускає polling.
-
-    Конфіг читається з .env / ENV.
-    AppConfig передається у всі handlers через middleware-data.
-    """
-    cfg = load_config()
+    """Ініціалізує та запускає бота."""
+    cfg = get_config()
     setup_logging(cfg.log_level)
     log = logging.getLogger(__name__)
 
-    # Гарантуємо наявність тимчасових папок
+    # Гарантуємо наявність робочих папок
     cfg.temp_dir.mkdir(parents=True, exist_ok=True)
     (cfg.temp_dir / "processed").mkdir(parents=True, exist_ok=True)
     cfg.output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # ---------------------------------------------------------------------------
-    # Ініціалізація бота та диспетчера
-    # ---------------------------------------------------------------------------
+    # ── Bot & Dispatcher ──────────────────────────────────────────────────────
     bot = Bot(
         token=cfg.tg_bot_token,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
-    # MemoryStorage — зберігає FSM-стани в пам'яті.
-    # Для продакшену замінити на RedisStorage:
+    # MemoryStorage — для локальної розробки.
+    # Продакшен → RedisStorage:
     #   from aiogram.fsm.storage.redis import RedisStorage
-    #   storage = RedisStorage.from_url("redis://localhost:6379")
+    #   storage = RedisStorage.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
     storage = MemoryStorage()
-
     dp = Dispatcher(storage=storage)
 
-    # ---------------------------------------------------------------------------
-    # Передаємо AppConfig у всі handlers через workflow_data
-    # (доступно як параметр cfg: AppConfig у будь-якому handler)
-    # ---------------------------------------------------------------------------
+    # ── Middleware ────────────────────────────────────────────────────────────
+    dp.update.outer_middleware(LoggingMiddleware())
+
+    # ── AppConfig → доступний у всіх handlers як параметр cfg ────────────────
     dp["cfg"] = cfg
 
-    # Реєструємо router з handlers
-    dp.include_router(router)
+    # ── Routers ──────────────────────────────────────────────────────────────
+    dp.include_router(build_router())
 
-    # ---------------------------------------------------------------------------
-    # Запуск
-    # ---------------------------------------------------------------------------
-    log.info("🤖 Centurion Mix Bot запущено. Очікую повідомлення...")
+    # ── Старт ─────────────────────────────────────────────────────────────────
+    log.info("🤖 Centurion Mix Bot запущено")
     log.info("   temp_dir   : %s", cfg.temp_dir.resolve())
     log.info("   output_path: %s", cfg.output_path.resolve())
-    log.info("   playlist   : %s", cfg.playlist_url or "(не вказано, задаєш через бот)")
+    log.info("   ffmpeg_dir : %s", cfg.ffmpeg_dir.resolve())
+    log.info("   playlist   : %s", cfg.playlist_url or "(задається через бот ⚙️)")
 
+    # ── Long-polling ──────────────────────────────────────────────────────────
     try:
-        await dp.start_polling(
-            bot,
-            allowed_updates=dp.resolve_used_update_types(),
-        )
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
     finally:
         await bot.session.close()
         log.info("🛑 Бот зупинено.")
 
+    # ── Webhook (розкоментуй для продакшену) ──────────────────────────────────
+    # from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+    # from aiohttp import web
+    # WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+    # await bot.set_webhook(WEBHOOK_URL)
+    # app = web.Application()
+    # SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path="/webhook")
+    # setup_application(app, dp, bot=bot)
+    # web.run_app(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+
 
 if __name__ == "__main__":
     asyncio.run(main())
-

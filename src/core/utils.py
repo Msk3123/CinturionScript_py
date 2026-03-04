@@ -11,25 +11,43 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
+def find_ffmpeg(ffmpeg_dir: Path) -> Path:
+    """
+    Повертає шлях до виконуваного файлу ffmpeg.
+
+    Порядок пошуку:
+      1. ffmpeg_dir/ffmpeg.exe  (Windows-бінарник у репо)
+      2. ffmpeg_dir/ffmpeg      (Linux-бінарник у репо)
+      3. ffmpeg у системному PATH (Linux apt / Mac brew / Docker)
+
+    Returns:
+        Path до ffmpeg-бінарника.
+
+    Raises:
+        RuntimeError: якщо ffmpeg не знайдено ніде.
+    """
+    for candidate in (ffmpeg_dir / "ffmpeg.exe", ffmpeg_dir / "ffmpeg"):
+        if candidate.exists():
+            return candidate
+    system_ffmpeg = shutil.which("ffmpeg")
+    if system_ffmpeg:
+        return Path(system_ffmpeg)
+    raise RuntimeError(
+        "ffmpeg не знайдено.\n"
+        "  • Windows: поклади ffmpeg.exe у папку ffmpeg/\n"
+        "  • Linux/Mac: sudo apt install ffmpeg  або  brew install ffmpeg\n"
+        "  • Docker: ffmpeg встановлюється автоматично через Dockerfile"
+    )
+
+
 def require_ffmpeg(ffmpeg_dir: Path) -> None:
     """
-    Перевіряє наявність ffmpeg.
-
-    Шукає спочатку в ffmpeg_dir, потім у PATH.
+    Перевіряє наявність ffmpeg (кидає RuntimeError якщо немає).
 
     Raises:
         RuntimeError: якщо ffmpeg не знайдено.
     """
-    local = ffmpeg_dir / "ffmpeg.exe"
-    if local.exists():
-        return
-    if shutil.which("ffmpeg"):
-        return
-    raise RuntimeError(
-        f"ffmpeg не знайдено.\n"
-        f"  Поклади ffmpeg.exe у папку: {ffmpeg_dir}\n"
-        f"  або встанови ffmpeg і додай у PATH."
-    )
+    find_ffmpeg(ffmpeg_dir)  # кидає сам якщо не знайшов
 
 
 def require_audioop() -> None:

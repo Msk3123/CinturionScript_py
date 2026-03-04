@@ -16,6 +16,8 @@ from typing import Any, Generator
 
 from yt_dlp import YoutubeDL
 
+from src.core.utils import find_ffmpeg
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +56,7 @@ class Downloader:
             "skip_download": True,
             "ignoreerrors": True,
             "noplaylist": False,
-            "ffmpeg_location": str(self.ffmpeg_dir),
+            "ffmpeg_location": str(find_ffmpeg(self.ffmpeg_dir).parent),
         }
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(playlist_url, download=False)
@@ -103,7 +105,7 @@ class Downloader:
                 "no_warnings": True,
                 "ignoreerrors": True,
                 "noplaylist": True,
-                "ffmpeg_location": str(self.ffmpeg_dir),
+                "ffmpeg_location": str(find_ffmpeg(self.ffmpeg_dir).parent),
             }
 
             with YoutubeDL(ydl_opts) as ydl:

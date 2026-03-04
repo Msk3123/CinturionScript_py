@@ -14,6 +14,7 @@ import logging
 import sys
 from pathlib import Path
 
+# Додаємо корінь проєкту до sys.path (щоб працювало з bin/)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.config.settings import get_config
@@ -31,11 +32,11 @@ def setup_logging(level: str) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Centurion Mix — CLI генератор")
-    p.add_argument("--playlist",     default=None,  help="URL плейлиста YouTube")
-    p.add_argument("--output",       default=None,  help="Шлях до фінального mp3")
-    p.add_argument("--temp",         default=None,  help="Тимчасова папка")
-    p.add_argument("--bitrate",      default=None,  help="Бітрейт (наприклад 192k)")
-    p.add_argument("--duration-sec", type=float,    default=None, help="Тривалість фрагменту (сек)")
+    p.add_argument("--playlist",      default=None,        help="URL плейлиста YouTube")
+    p.add_argument("--output",        default=None,        help="Шлях до фінального mp3")
+    p.add_argument("--temp",          default=None,        help="Тимчасова папка")
+    p.add_argument("--bitrate",       default=None,        help="Бітрейт (наприклад 192k)")
+    p.add_argument("--duration-sec",  type=float, default=None, help="Тривалість фрагменту (сек)")
     p.add_argument("--skip-download", action="store_true", help="Обробити локальні mp3")
     p.add_argument("--demo",          action="store_true", help="Демо без YouTube")
     return p
